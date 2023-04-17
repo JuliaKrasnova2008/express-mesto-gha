@@ -19,7 +19,7 @@ module.exports.getUserById = (req, res) => {
       return res.status(404).send({ message: 'Пользователь не найден' });
     })
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка на сервере.' });
+      res.status(400).send({ message: 'Произошла ошибка на сервере.' });
     });
 };
 

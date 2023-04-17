@@ -28,8 +28,9 @@ module.exports.deleteCard = (req, res) => {
 
 module.exports.addCard = (req, res) => {
   const { name, link } = req.body;
+  const { id } = req.user;
 
-  Card.create({ name, link })
+  Card.create({ name, link, owner: id })
     .then((card) => res.send(card)).catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(400).send({ message: 'Передены невалидные данные.' });
