@@ -6,8 +6,6 @@ const router = require('./routes');
 const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,11 +17,13 @@ app.use((req, res, next) => {
   next();
 });
 
+mongoose.connect('mongodb://localhost:27017/mestodb');
+app.use('/', router);
+
 app.use((req, res) => {
   res.status(404).send({
     message: 'Такой адрес не существует',
   });
 });
 
-app.use(router);
 app.listen(PORT, () => console.log(`Server started ${PORT}`));
