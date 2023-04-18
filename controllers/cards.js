@@ -31,7 +31,7 @@ module.exports.addCard = (req, res) => {
   const id = req.user._id;
 
   Card.create({ name, link, owner: id })
-    .then((card) => res.send(card)).catch((error) => {
+    .then((card) => res.status(201).send(card)).catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(400).send({ message: 'Передены невалидные данные.' });
       }
