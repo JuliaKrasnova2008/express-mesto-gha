@@ -35,7 +35,7 @@ module.exports.getCards = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
-  Card.findByIdAndRemove({ _id: cardId })
+  Card.findByIdAndDelete({ _id: cardId })
     .orFail(() => {
       throw new NotFound();
     })
