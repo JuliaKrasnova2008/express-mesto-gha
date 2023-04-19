@@ -1,13 +1,13 @@
-// const Card = require('../models/card');
 const cardSchema = require('../models/card');
 const NotFound = require('../errors/errors');
+const STATUS_CODE = require('../errors/errorCodes');
 
 // возвращаем все карточки
 module.exports.getCards = (req, res) => {
   cardSchema
     .find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка на сервере.' }));
+    .then((cards) => res.send({ cards }))
+    .catch(() => res.status(STATUS_CODE.internalServerError).send({ message: 'Произошла ошибка на сервере.' }));
 };
 
 // создаем карточку
@@ -16,14 +16,14 @@ module.exports.addCard = (req, res) => {
   const owner = req.user._id;
   cardSchema
     .create({ name, link, owner })
-    .then((card) => res.status(200).send(card))
+    .then((card) => res.status(STATUS_CODE.сreated).send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(STATUS_CODE.badRequest).send({
           message: 'Переданы некорректные данные при создании карточки.',
         });
       } else {
-        res.status(500).send({
+        res.status(STATUS_CODE.internalServerError).send({
           message: 'Произошла ошибка на сервере.',
         });
       }
@@ -42,11 +42,11 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'NotFound') {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(STATUS_CODE.notFound).send({ message: 'Карточка с указанным _id не найдена.' });
       } else if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неправильно передан id.' });
+        res.status(STATUS_CODE.badRequest).send({ message: 'Неправильно передан id.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере.' });
+        res.status(STATUS_CODE.internalServerError).send({ message: 'Произошла ошибка на сервере.' });
       }
     });
 };
@@ -55,7 +55,8 @@ module.exports.likeCard = (req, res) => {
   const id = req.user._id;
   const { cardId } = req.params;
 
-  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
+  cardSchema
+    .findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
     .orFail(() => {
       throw new NotFound();
     })
@@ -64,11 +65,11 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'NotFound') {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(STATUS_CODE.notFound).send({ message: 'Карточка с указанным _id не найдена.' });
       } else if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неправильно передан id.' });
+        res.status(STATUS_CODE.badRequest).send({ message: 'Неправильно передан id.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере.' });
+        res.status(STATUS_CODE.internalServerError).send({ message: 'Произошла ошибка на сервере.' });
       }
     });
 };
@@ -77,7 +78,7 @@ module.exports.dislikeCard = (req, res) => {
   const id = req.user._id;
   const { cardId } = req.params;
 
-  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
+  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
     .orFail(() => {
       throw new NotFound();
     })
@@ -85,15 +86,15 @@ module.exports.dislikeCard = (req, res) => {
       if (card) {
         return res.send(card);
       }
-      return res.status(404).send({ message: 'Карточка не найдена' });
+      return res.status(STATUS_CODE.notFound).send({ message: 'Карточка не найдена' });
     })
     .catch((error) => {
       if (error.name === 'NotFound') {
-        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+        res.status(STATUS_CODE.notFound).send({ message: 'Карточка с указанным _id не найдена.' });
       } else if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неправильно передан id.' });
+        res.status(STATUS_CODE.badRequest).send({ message: 'Неправильно передан id.' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере.' });
+        res.status(STATUS_CODE.internalServerError).send({ message: 'Произошла ошибка на сервере.' });
       }
     });
 };
