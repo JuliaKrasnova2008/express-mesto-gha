@@ -9,10 +9,10 @@ const {
 
 const usersRouter = express.Router();
 
-usersRouter.get('/users', getUsers);
-usersRouter.post('/users', addUser);
-usersRouter.get('/users/:userId', getUserById);
-usersRouter.patch('/users/me', editProfile);
-usersRouter.patch('/users/me/avatar', editAvatar);
+usersRouter.get('/', getUsers);
+usersRouter.post('/', addUser);
+usersRouter.get('/:userId', getUserById);
+usersRouter.patch('/me', editProfile);
+usersRouter.patch('/me/avatar', editAvatar);
 
 module.exports = usersRouter;
