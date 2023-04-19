@@ -8,7 +8,7 @@ const {
 module.exports.getCards = (req, res) => {
   cardSchema
     .find({})
-    .populate('owner')
+    .populate(['owner', 'likes'])
     .then((cards) => res.send({ cards }))
     .catch(() => res.status(internalServerError).send({ message: 'Произошла ошибка на сервере.' }));
 };

@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const router = require('./routes');
+const {
+  notFound
+} = require('./errors/errorCodes');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -21,7 +24,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use('/', router);
 
 app.use((req, res) => {
-  res.status(404).send({
+  res.status(notFound).send({
     message: 'Такой адрес не существует',
   });
 });
