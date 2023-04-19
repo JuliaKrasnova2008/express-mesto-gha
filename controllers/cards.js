@@ -1,14 +1,22 @@
-const Card = require('../models/card');
+// const Card = require('../models/card');
+const cardSchema = require('../models/card');
 const NotFound = require('../errors/errors');
 
+// возвращаем все карточки
+module.exports.getCards = (req, res) => {
+  cardSchema
+    .find({})
+    .then((cards) => res.status(200).send(cards))
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка на сервере.' }));
+};
+
+// создаем карточку
 module.exports.addCard = (req, res) => {
   const { name, link } = req.body;
-  const id = req.user._id;
-
-  Card.create({ name, link, owner: id })
-    .then((card) => {
-      res.status(201).send(card);
-    })
+  const owner = req.user._id;
+  cardSchema
+    .create({ name, link, owner })
+    .then((card) => res.status(200).send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(400).send({
@@ -22,20 +30,10 @@ module.exports.addCard = (req, res) => {
     });
 };
 
-module.exports.getCards = (req, res) => {
-  Card.find({})
-    .then((cards) => {
-      res.send({ cards });
-    })
-    .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка на сервере.' });
-    });
-};
-
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
-  Card.findByIdAndDelete({ _id: cardId })
+  cardSchema.findByIdAndDelete({ _id: cardId })
     .orFail(() => {
       throw new NotFound();
     })
@@ -57,7 +55,7 @@ module.exports.likeCard = (req, res) => {
   const id = req.user._id;
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
+  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
     .orFail(() => {
       throw new NotFound();
     })
@@ -79,7 +77,7 @@ module.exports.dislikeCard = (req, res) => {
   const id = req.user._id;
   const { cardId } = req.params;
 
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
+  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true, runValidators: true })
     .orFail(() => {
       throw new NotFound();
     })
