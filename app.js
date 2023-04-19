@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use('/', router);
 
-app.use((req, res) => {
+app.use('*', (req, res) => {
   res.status(404).send({
     message: 'Такой адрес не существует',
   });
