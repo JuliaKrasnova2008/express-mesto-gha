@@ -12,7 +12,7 @@ const cardsRouter = express.Router();
 cardsRouter.get('/', getCards);
 cardsRouter.post('/', addCard);
 cardsRouter.delete('/:cardId', deleteCard);
-cardsRouter.put('/likes/:cardId', likeCard);
+cardsRouter.put('/:cardId/likes', likeCard);
 cardsRouter.delete('/:cardId/likes', dislikeCard);
 
 module.exports = cardsRouter;
