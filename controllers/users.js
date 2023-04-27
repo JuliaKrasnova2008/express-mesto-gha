@@ -4,10 +4,12 @@ const jwt = require('jsonwebtoken');
 const userSchema = require('../models/user');
 const { сreated } = require('../errors/errorCodes');
 
-const Unauthorized = require('../errors/unauthorized');
+// const Unauthorized = require('../errors/unauthorized');
 const Conflict = require('../errors/conflict');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // ищем всех пользователей
 module.exports.getUsers = (req, res, next) => {
@@ -87,19 +89,14 @@ module.exports.addUser = (req, res, next) => {
 // контроллер login, который получает из запроса почту и пароль и проверяет их
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  userSchema.findOne({ email }).select('+password')
+  return userSchema.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new Unauthorized('Неверная почта или пароль');
-      }
-      return bcrypt.compare(password, user.password)
-        .then((response) => {
-          if (!response) {
-            next(new Unauthorized('Неверная почта или пароль'));
-          }
-          const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' },);
-          return res.send({ token });
-        });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      res.send({ token });
     })
     .catch(next);
 };
@@ -115,7 +112,7 @@ module.exports.editProfile = (req, res, next) => {
     })
     .then((user) => res.send(user))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.name === 'ValidationError' || error.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
       } else {
         next(error);
