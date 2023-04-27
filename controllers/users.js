@@ -115,8 +115,8 @@ module.exports.editProfile = (req, res, next) => {
     })
     .then((user) => res.send(user))
     .catch((error) => {
-      if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      if (error.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
       } else {
         next(error);
       }
