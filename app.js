@@ -19,8 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 // роуты, не требующие авторизации,
-app.post('/signin', login, validateLogin);
-app.post('/signup', addUser, validateAddUser);
+app.post('/signin', validateLogin, login);
+app.post('/signup', validateAddUser, addUser);
 app.use(auth);
 app.use(router);
 
