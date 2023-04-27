@@ -9,7 +9,7 @@ const Conflict = require('../errors/conflict');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+// const { NODE_ENV, JWT_SECRET } = process.env;
 
 // ищем всех пользователей
 module.exports.getUsers = (req, res, next) => {
@@ -87,18 +87,32 @@ module.exports.addUser = (req, res, next) => {
 };
 
 // контроллер login, который получает из запроса почту и пароль и проверяет их
+// module.exports.login = (req, res, next) => {
+//   const { email, password } = req.body;
+//   return userSchema.findUserByCredentials(email, password)
+//     .then((user) => {
+//       const token = jwt.sign(
+//         { _id: user._id },
+//         NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+//         { expiresIn: '7d' },
+//       );
+//       res.send({ token });
+//     })
+//     .catch(next);
+// };
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
+
   return userSchema.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
-        { expiresIn: '7d' },
-      );
-      res.send({ token });
+      res.send({
+        token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
+      });
     })
-    .catch(next);
+    .catch((error) => {
+      next(error);
+    });
 };
 
 // редактировать профиль
