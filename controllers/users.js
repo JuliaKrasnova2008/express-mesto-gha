@@ -14,7 +14,7 @@ module.exports.getUsers = (req, res, next) => {
   userSchema
     .find({})
     .then((users) => res.send(users))
-    .catch(next)
+    .catch(next);
 };
 
 // ищем по ID
@@ -24,43 +24,48 @@ module.exports.getUserById = (req, res, next) => {
   userSchema
     .findById(userId)
     .orFail(() => {
-      throw new NotFound('Пользователь по данному _id не найден')
+      throw new NotFound('Пользователь по данному _id не найден');
     })
     .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new BadRequest('Пользователь не найден'));
       } else {
-        next(error)
+        next(error);
       }
     });
 };
 
-//получаем текущего пользователя
+// получаем текущего пользователя
 module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
 
   userSchema
     .findById(_id)
     .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден')
+      throw new NotFound('Пользователь с данным _id не найден');
     })
     .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'))
+        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
       } else {
-        next(error)
+        next(error);
       }
     });
 };
 
 // создать пользователя
 module.exports.addUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password
+  } = req.body;
+
   bcrypt.hash(password, 10)
     .then((hash) => userSchema
-      .create({ name, about, avatar, email, password: hash }))
+      .create({
+        name, about, avatar, email, password: hash
+      }))
     .then((user) => res.status(сreated).send({
       email: user.email,
       name: user.name,
@@ -79,29 +84,25 @@ module.exports.addUser = (req, res, next) => {
     });
 };
 
-
-//контроллер login, который получает из запроса почту и пароль и проверяет их.
+// контроллер login, который получает из запроса почту и пароль и проверяет их
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   userSchema.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new Unauthorized('Неверная почта или пароль')
+        throw new Unauthorized('Неверная почта или пароль');
       }
       return bcrypt.compare(password, user.password)
         .then((response) => {
           if (!response) {
-            next(new Unauthorized('Неверная почта или пароль'))
+            next(new Unauthorized('Неверная почта или пароль'));
           }
-          const token = jwt.sign(
-            { _id: user._id }, 'some-secret-key', { expiresIn: '7d' },
-          );
+          const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' },);
           return res.send({ token });
-        })
+        });
     })
     .catch(next);
 };
-
 
 // редактировать профиль
 module.exports.editProfile = (req, res, next) => {
@@ -110,14 +111,14 @@ module.exports.editProfile = (req, res, next) => {
 
   userSchema.findByIdAndUpdate(id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден')
+      throw new NotFound('Пользователь с данным _id не найден');
     })
     .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'))
+        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
       } else {
-        next(error)
+        next(error);
       }
     });
 };
@@ -129,14 +130,14 @@ module.exports.editAvatar = (req, res, next) => {
 
   userSchema.findByIdAndUpdate(id, avatar, { new: true, runValidators: true })
     .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден')
+      throw new NotFound('Пользователь с данным _id не найден');
     })
     .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'))
+        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
       } else {
-        next(error)
+        next(error);
       }
     });
 };

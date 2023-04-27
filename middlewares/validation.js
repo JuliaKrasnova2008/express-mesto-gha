@@ -2,13 +2,13 @@ const { celebrate, Joi } = require('celebrate');
 const isUrl = require('validator/lib/isURL');
 const BadRequest = require('../errors/badRequest');
 
-//url
+// url
 const validateUrl = (url) => {
   const validate = isUrl(url);
   if (validate) {
-    return url
+    return url;
   }
-  throw new BadRequest('Пользователь по данному URL не найден')
+  throw new BadRequest('Пользователь по данному URL не найден');
 };
 
 // ID
