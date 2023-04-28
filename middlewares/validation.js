@@ -1,16 +1,8 @@
 const { celebrate, Joi } = require('celebrate');
-const isUrl = require('validator/lib/isURL');
 const BadRequest = require('../errors/badRequest');
 
-// url
-const validateUrl = (url) => {
-  const validate = isUrl(url);
-  if (validate) {
-    return url;
-  }
-  throw new BadRequest('Пользователь по данному URL не найден');
-};
-
+const REGEXP = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+module.exports = { REGEXP };
 // ID
 const validateID = (id) => {
   if (/^[0-9a-fA-F]{24}$/.test(id)) {
@@ -49,7 +41,7 @@ module.exports.validateEditProfile = celebrate({
 module.exports.validateAddCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().required().custom(validateUrl),
+    link: Joi.string().required().pattern(REGEXP),
   }).unknown(true),
   params: Joi.object().keys({
     cardId: Joi.string().alphanum().length(24),
@@ -81,6 +73,6 @@ module.exports.validateEditAvatar = celebrate({
     about: Joi.string().min(2).max(30).required(),
   }).unknown(true),
   params: Joi.object().keys({
-    userId: Joi.string().required().custom(validateID),
+    userId: Joi.string().required().pattern(REGEXP),
   }).unknown(true),
 });
