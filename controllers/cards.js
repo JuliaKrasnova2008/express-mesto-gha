@@ -19,11 +19,13 @@ module.exports.getCards = (req, res, next) => {
 
 // создаем карточку
 module.exports.addCard = (req, res, next) => {
+  const { _id } = req.user;
   const { name, link } = req.body;
-  const owner = req.user._id;
-  cardSchema
-    .create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
+
+  cardSchema.create({ name, link, owner: _id })
+    .then((card) => {
+      res.status(201).send(card);
+    })
     .catch(next);
 };
 
