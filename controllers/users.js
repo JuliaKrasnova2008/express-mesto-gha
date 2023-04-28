@@ -24,10 +24,8 @@ module.exports.getUsers = (req, res, next) => {
 
 // ищем по ID
 module.exports.getUserById = (req, res, next) => {
-  const { userId } = req.params;
-
   userSchema
-    .findById(userId)
+    .findById(req.params.userId)
     .then((user) => {
       if (!user) {
         throw new NotFound('Пользователь по данному _id не найден');
@@ -68,7 +66,6 @@ module.exports.addUser = (req, res, next) => {
       name: user.name,
       about: user.about,
       avatar: user.avatar,
-      _id: user._id,
     }))
     .catch((error) => {
       if (error.code === 11000) {
@@ -79,10 +76,10 @@ module.exports.addUser = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return userSchema.findOne({ email }).select('+password')
+  userSchema.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new NotFound('Пользователь не найден');
+        throw new Unauthorized('Пользователь не найден');
       }
       return bcrypt.compare(password, user.password).then((match) => {
         if (!match) {
@@ -90,7 +87,7 @@ module.exports.login = (req, res, next) => {
         }
         const token = jwt.sign(
           { _id: user._id },
-          'some-secret-key',
+          'super-secret-key',
           { expiresIn: '7d' },
         );
         return res.send({ token });
