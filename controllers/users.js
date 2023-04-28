@@ -9,7 +9,7 @@ const Conflict = require('../errors/conflict');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
 
-// const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // ищем всех пользователей
 module.exports.getUsers = (req, res, next) => {
@@ -103,16 +103,16 @@ module.exports.addUser = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
   return userSchema.findUserByCredentials(email, password)
     .then((user) => {
-      res.send({
-        token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      res.send({ token });
     })
-    .catch((error) => {
-      next(error);
-    });
+    .catch(next);
 };
 
 // редактировать профиль

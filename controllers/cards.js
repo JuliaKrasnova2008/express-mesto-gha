@@ -3,15 +3,15 @@ const Forbidden = require('../errors/forbidden');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
 
-const { internalServerError } = require('../errors/errorCodes');
+// const { internalServerError } = require('../errors/errorCodes');
 
 // возвращаем все карточки
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   cardSchema
     .find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send({ cards }))
-    .catch(() => res.status(internalServerError).send({ message: 'Произошла ошибка на сервере.' }));
+    .catch(next);
 };
 
 // создаем карточку
