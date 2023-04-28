@@ -1,7 +1,8 @@
 const { celebrate, Joi } = require('celebrate');
 const BadRequest = require('../errors/badRequest');
 
-const REGEXP = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const REGEXP = /https?:\/\/(www\.)?[a-z0-9.-]{2,}\.[a-z]{2,}\/?[-._~:/?#[\]@!$&'()*+,;=]*/;
+
 module.exports = { REGEXP };
 // ID
 const validateID = (id) => {
