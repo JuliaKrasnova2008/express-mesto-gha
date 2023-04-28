@@ -42,7 +42,7 @@ module.exports.validateEditProfile = celebrate({
 module.exports.validateAddCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().required().pattern(REGEXP),
+    avatar: Joi.string().required().pattern(REGEXP),
   }).unknown(true),
   params: Joi.object().keys({
     cardId: Joi.string().alphanum().length(24),
