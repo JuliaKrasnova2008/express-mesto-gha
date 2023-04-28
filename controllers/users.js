@@ -15,7 +15,12 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 module.exports.getUsers = (req, res, next) => {
   userSchema
     .find({})
-    .then((users) => res.send(users))
+    .then((users) => {
+      if (!users) {
+        throw new NotFound('Пользователи не найдены');
+      }
+      return res.send(users);
+    })
     .catch(next);
 };
 
@@ -29,13 +34,7 @@ module.exports.getUserById = (req, res, next) => {
       throw new NotFound('Пользователь по данному _id не найден');
     })
     .then((user) => res.send(user))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        next(new BadRequest('Пользователь не найден'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
 
 // получаем текущего пользователя
@@ -48,13 +47,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       throw new NotFound('Пользователь с данным _id не найден');
     })
     .then((user) => res.send(user))
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
 
 // создать пользователя
@@ -124,14 +117,13 @@ module.exports.editProfile = (req, res, next) => {
     .orFail(() => {
       throw new NotFound('Пользователь с данным _id не найден');
     })
-    .then((user) => res.send(user))
-    .catch((error) => {
-      if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
-      } else {
-        next(error);
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Пользователь по данному _id не найден');
       }
-    });
+      return res.send(user);
+    })
+    .catch(next);
 };
 
 // редактирование аватара
@@ -144,11 +136,5 @@ module.exports.editAvatar = (req, res, next) => {
       throw new NotFound('Пользователь с данным _id не найден');
     })
     .then((user) => res.send(user))
-    .catch((error) => {
-      if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
