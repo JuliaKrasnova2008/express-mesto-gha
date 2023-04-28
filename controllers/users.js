@@ -79,25 +79,47 @@ module.exports.addUser = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return userSchema.findOne({ email }).select('+password')
+
+  userSchema.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new NotFound('Пользователь не найден');
+        throw new Unauthorized('Пользователь не найден');
       }
-      return bcrypt.compare(password, user.password).then((match) => {
-        if (!match) {
-          next(new Unauthorized('Не правильно указан логин или пароль'));
-        }
-        const token = jwt.sign(
-          { _id: user._id },
-          'some-secret-key',
-          { expiresIn: '7d' },
-        );
-        return res.send({ token });
-      });
+      return bcrypt.compare(password, user.password)
+        .then((match) => {
+          if (!match) {
+            next(new Unauthorized('Не правильно указан логин или пароль'));
+          }
+          const token = jwt.sign(
+            { _id: user._id },
+            'super-secret-key',
+            { expiresIn: '7d' },
+          );
+          return res.send({ token });
+        });
     })
     .catch(next);
 };
+
+// const login = (req, res, next) => {
+//   const { email, password } = req.body;
+
+//   User.findOne({ email }).select('+password')
+//     .then((user) => {
+//       if (!user) {
+//         throw new UnauthorizedError('Пользователь не найден.');
+//       }
+//       return bcrypt.compare(password, user.password)
+//         .then((matched) => {
+//           if (!matched) {
+//             next(new UnauthorizedError('Не правильно указан логин или пароль.'));
+//           }
+//           const token = jwt.sign({ _id: user._id }, 'super-secret-key', { expiresIn: '7d' });
+//           return res.send({ token });
+//         });
+//     })
+//     .catch(next);
+// };
 
 // редактировать профиль
 module.exports.editProfile = (req, res, next) => {
