@@ -6,10 +6,8 @@ const { сreated } = require('../errors/errorCodes');
 
 // const Unauthorized = require('../errors/unauthorized');
 const Conflict = require('../errors/conflict');
-const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
-
-const { NODE_ENV, JWT_SECRET } = process.env;
+const Unauthorized = require('../errors/unauthorized');
 
 // ищем всех пользователей
 module.exports.getUsers = (req, res, next) => {
@@ -30,10 +28,12 @@ module.exports.getUserById = (req, res, next) => {
 
   userSchema
     .findById(userId)
-    .orFail(() => {
-      throw new NotFound('Пользователь по данному _id не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Пользователь по данному _id не найден');
+      }
+      return res.send(user);
     })
-    .then((user) => res.send(user))
     .catch(next);
 };
 
@@ -43,10 +43,12 @@ module.exports.getCurrentUser = (req, res, next) => {
 
   userSchema
     .findById(_id)
-    .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Пользователь по данному _id не найден');
+      }
+      return res.send(user);
     })
-    .then((user) => res.send(user))
     .catch(next);
 };
 
@@ -71,39 +73,28 @@ module.exports.addUser = (req, res, next) => {
     .catch((error) => {
       if (error.code === 11000) {
         next(new Conflict('Такой пользователь уже существует'));
-      } else if (error.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(error);
       }
     });
 };
 
-// контроллер login, который получает из запроса почту и пароль и проверяет их
-// module.exports.login = (req, res, next) => {
-//   const { email, password } = req.body;
-//   return userSchema.findUserByCredentials(email, password)
-//     .then((user) => {
-//       const token = jwt.sign(
-//         { _id: user._id },
-//         NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
-//         { expiresIn: '7d' },
-//       );
-//       res.send({ token });
-//     })
-//     .catch(next);
-// };
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  return userSchema.findUserByCredentials(email, password)
+  return userSchema.findOne({ email }).select('+password')
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
-        { expiresIn: '7d' },
-      );
-      res.send({ token });
+      if (!user) {
+        throw new NotFound('Пользователь не найден');
+      }
+      return bcrypt.compare(password, user.password).then((match) => {
+        if (!match) {
+          next(new Unauthorized('Не правильно указан логин или пароль'));
+        }
+        const token = jwt.sign(
+          { _id: user._id },
+          'some-secret-key',
+          { expiresIn: '7d' },
+        );
+        return res.send({ token });
+      });
     })
     .catch(next);
 };
@@ -114,9 +105,6 @@ module.exports.editProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   userSchema.findByIdAndUpdate(id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден');
-    })
     .then((user) => {
       if (!user) {
         throw new NotFound('Пользователь по данному _id не найден');
@@ -132,9 +120,11 @@ module.exports.editAvatar = (req, res, next) => {
   const avatar = req.body;
 
   userSchema.findByIdAndUpdate(id, avatar, { new: true, runValidators: true })
-    .orFail(() => {
-      throw new NotFound('Пользователь с данным _id не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFound('Пользователь по данному _id не найден');
+      }
+      return res.send(user);
     })
-    .then((user) => res.send(user))
     .catch(next);
 };

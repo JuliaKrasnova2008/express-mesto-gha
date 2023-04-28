@@ -9,7 +9,7 @@ module.exports.getCards = (req, res, next) => {
   cardSchema
     .find({})
     .populate(['owner', 'likes'])
-    .then((cards) => res.status(201).send({ cards }))
+    .then((cards) => res.status(201).send(cards))
     .catch(next);
 };
 
@@ -27,14 +27,14 @@ module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   cardSchema.findByIdAndDelete({ _id: cardId })
-    .orFail(() => {
-      throw new NotFound('Карточка с данным _id не найдена');
-    })
     .then((card) => {
+      if (!card) {
+        throw new NotFound('Карточка с данным _id не найдена');
+      }
       if (card.owner.toString() !== req.user._id) {
         throw new Forbidden('Доступ запрещен');
       }
-      return res.send({ card });
+      return res.send(card);
     })
     .catch(next);
 };
@@ -45,11 +45,11 @@ module.exports.likeCard = (req, res, next) => {
 
   cardSchema
     .findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
-    .orFail(() => {
-      throw new NotFound('Передан несуществующий id карточки');
-    })
     .then((card) => {
-      res.send({ card });
+      if (!card) {
+        throw new NotFound('Карточка с данным _id не найдена');
+      }
+      res.send(card);
     })
     .catch(next);
 };
@@ -59,15 +59,11 @@ module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
-    .orFail(() => {
-      throw new NotFound('Передан несуществующий id карточки');
-    })
     .then((card) => {
-      if (card) {
-        res.send(card);
-      } else {
+      if (!card) {
         throw new NotFound('Карточка с данным _id не найдена');
       }
+      res.send(card);
     })
     .catch(next);
 };
