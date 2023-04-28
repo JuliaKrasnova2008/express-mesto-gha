@@ -8,8 +8,12 @@ const NotFound = require('../errors/notFound');
 module.exports.getCards = (req, res, next) => {
   cardSchema
     .find({})
-    .populate(['owner', 'likes'])
-    .then((cards) => res.status(201).send(cards))
+    .then((cards) => {
+      if (!cards) {
+        throw new NotFound('Карточки не найдены.');
+      }
+      return res.send(cards);
+    })
     .catch(next);
 };
 
