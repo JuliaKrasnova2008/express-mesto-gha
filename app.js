@@ -42,8 +42,6 @@ app.post(
   }),
   addUser
 );
-// app.post('/signin', validateLogin, login);
-// app.post('/signup', validateAddUser, addUser);
 
 app.use(auth);
 app.use(router);
@@ -59,8 +57,6 @@ app.use((req, res) => {
 app.use(defaultErr);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
-
-// роуты, не требующие авторизации,
 
 app.listen(3000, () => {
   console.log('server started on port 3000');

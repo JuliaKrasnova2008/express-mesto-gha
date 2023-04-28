@@ -2,8 +2,6 @@ const cardSchema = require('../models/card');
 const Forbidden = require('../errors/forbidden');
 const NotFound = require('../errors/notFound');
 
-// const { internalServerError } = require('../errors/errorCodes');
-
 // возвращаем все карточки
 module.exports.getCards = (req, res, next) => {
   cardSchema
