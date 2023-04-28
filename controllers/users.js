@@ -80,7 +80,7 @@ module.exports.addUser = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  userSchema.findOne({ email }).select('+password')
+  return userSchema.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new Unauthorized('Пользователь не найден');
