@@ -13,10 +13,7 @@ module.exports.getUsers = (req, res, next) => {
   userSchema
     .find({})
     .then((users) => {
-      if (!users) {
-        throw new NotFound('Пользователи не найдены');
-      }
-      return res.send(users);
+      res.send(users);
     })
     .catch(next);
 };

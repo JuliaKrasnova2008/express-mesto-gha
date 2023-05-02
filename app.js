@@ -8,6 +8,7 @@ const { login, addUser } = require('./controllers/users');
 const { REGEXP } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
 const defaultErr = require('./errors/defaultErr');
+const NotFound = require('./errors/notFound');
 
 const app = express();
 
@@ -48,10 +49,8 @@ app.use(router);
 
 app.use(errors());
 
-app.use((req, res) => {
-  res.status(404).send({
-    message: 'Порта не существует'
-  });
+app.use((req, res, next) => {
+  next(new NotFound('Порта не существует'));
 });
 
 app.use(defaultErr);

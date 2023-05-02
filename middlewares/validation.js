@@ -9,41 +9,42 @@ module.exports.validateEditProfile = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(30),
-  }).unknown(true),
+  })
 });
 
 // создание карточки
 module.exports.validateAddCard = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
+    name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().pattern(REGEXP),
-  }).unknown(true),
-  params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
-  }).unknown(true)
+  })
+  // .unknown(true),
+  // params: Joi.object().keys({
+  //   cardId: Joi.string().alphanum().length(24),
+  // }).unknown(true)
 });
 
 module.exports.validateDeleteCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
-  }).unknown(true)
+    cardId: Joi.string().length(24).hex().require(),
+  })
 });
 
 module.exports.validateLikeCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
-  }).unknown(true)
+    cardId: Joi.string().length(24).hex().require(),
+  })
 });
 
 // поиск пользователя по ID
 module.exports.validateUserById = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
-  }).unknown(true),
+    userId: Joi.string().length(24).hex().require(),
+  })
 });
 
 module.exports.validateEditAvatar = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().pattern(REGEXP),
-  }).unknown(true),
+  })
 });

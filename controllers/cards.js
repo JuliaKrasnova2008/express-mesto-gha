@@ -6,11 +6,9 @@ const NotFound = require('../errors/notFound');
 module.exports.getCards = (req, res, next) => {
   cardSchema
     .find({})
+    .populate(['owner', 'likes'])
     .then((cards) => {
-      if (!cards) {
-        throw new NotFound('Карточки не найдены.');
-      }
-      return res.send(cards);
+      res.send(cards);
     })
     .catch(next);
 };
@@ -30,15 +28,15 @@ module.exports.addCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  cardSchema.findByIdAndDelete({ _id: cardId })
+  cardSchema.findById({ _id: cardId })
     .then((card) => {
       if (!card) {
         throw new NotFound('Карточка с данным _id не найдена');
       }
-      if (card.owner.toString() !== req.user._id) {
+      if (!card.owner.equals(req.user._id)) {
         throw new Forbidden('Доступ запрещен');
       }
-      return res.send(card);
+      return card.remove().then(() => res.send({ message: 'Карточка удалена' }))
     })
     .catch(next);
 };
