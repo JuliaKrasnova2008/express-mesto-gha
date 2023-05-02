@@ -25,6 +25,7 @@ module.exports.addCard = (req, res, next) => {
     .catch(next);
 };
 
+// удаляем карточку
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
