@@ -36,7 +36,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new Forbidden('Доступ запрещен');
       }
-      return card.remove().then(() => res.send({ message: 'Карточка удалена' }))
+      return card.remove().then(() => res.send({ message: 'Карточка удалена' }));
     })
     .catch(next);
 };
