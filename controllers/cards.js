@@ -1,6 +1,7 @@
 const cardSchema = require('../models/card');
 const Forbidden = require('../errors/forbidden');
 const NotFound = require('../errors/notFound');
+const BadRequest = require('../errors/badRequest');
 
 // возвращаем все карточки
 module.exports.getCards = (req, res, next) => {
@@ -37,9 +38,19 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new Forbidden('Доступ запрещен');
       }
-      return card.remove().then(() => res.send({ message: 'Карточка удалена' }));
+      card.deleteOne()
+        .then(() => res.status(200).send({ message: 'Карточка удалена.' }))
+        .catch((error) => {
+          next(error);
+        });
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new BadRequest('Неверный id'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
