@@ -26,20 +26,20 @@ module.exports.validateAddCard = celebrate({
 
 module.exports.validateDeleteCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
+    cardId: Joi.string().required().hex().length(24),
   })
 });
 
 module.exports.validateLikeCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
+    cardId: Joi.string().required().hex().length(24),
   })
 });
 
 // поиск пользователя по ID
 module.exports.validateUserById = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().hex().length(24),
+    userId: Joi.string().required().hex().length(24),
   })
 });
 
