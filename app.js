@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors, celebrate, Joi } = require('celebrate');
-const helmet = require('helmet');
+// const helmet = require('helmet');
 const router = require('./routes');
 const { login, addUser } = require('./controllers/users');
 const { REGEXP } = require('./middlewares/validation');
@@ -12,10 +12,10 @@ const NotFound = require('./errors/notFound');
 const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
+const { PORT = 3000 } = process.env;
 const app = express();
 
-app.use(helmet());
-app.use(express.json());
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(cors);
@@ -61,6 +61,6 @@ app.use(defaultErr);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('server started on port 3000');
 });
