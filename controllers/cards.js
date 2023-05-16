@@ -23,7 +23,13 @@ module.exports.addCard = (req, res, next) => {
     .then((card) => {
       res.status(201).send(card);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new BadRequest('Некорректные данные при создании карточки'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 // удаляем карточку
@@ -58,7 +64,7 @@ module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
   cardSchema
-    .findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
+    .findByIdAndUpdate(cardId, { $addToSet: { likes: id } }, { new: true })
     .then((card) => {
       if (!card) {
         throw new NotFound('Карточка с данным _id не найдена');

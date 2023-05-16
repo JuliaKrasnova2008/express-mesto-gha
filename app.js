@@ -34,7 +34,6 @@ app.post(
         email: Joi.string().required().email(),
         password: Joi.string().required(),
       })
-      .unknown(true),
   }),
   login
 );
@@ -49,19 +48,17 @@ app.post(
         email: Joi.string().required().email(),
         password: Joi.string().required(),
       })
-      .unknown(true),
   }),
   addUser
 );
 
 app.use(auth);
 app.use(router);
-app.use(errorLogger);
-app.use(errors());
-
 app.use((req, res, next) => {
   next(new NotFound('Порта не существует'));
 });
+app.use(errorLogger);
+app.use(errors());
 
 app.use(defaultErr);
 

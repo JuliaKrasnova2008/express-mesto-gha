@@ -7,6 +7,9 @@ const { сreated } = require('../errors/errorCodes');
 const Conflict = require('../errors/conflict');
 const NotFound = require('../errors/notFound');
 const Unauthorized = require('../errors/unauthorized');
+const BadRequest = require('../errors/badRequest');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // ищем всех пользователей
 module.exports.getUsers = (req, res, next) => {
@@ -70,6 +73,11 @@ module.exports.addUser = (req, res, next) => {
       if (error.code === 11000) {
         next(new Conflict('Такой пользователь уже существует'));
       }
+      if (error.name === 'ValidationError') {
+        next(new BadRequest('Некорректные данные'));
+      } else {
+        next(error);
+      }
     });
 };
 
@@ -84,13 +92,11 @@ module.exports.login = (req, res, next) => {
       return bcrypt.compare(password, user.password)
         .then((match) => {
           if (!match) {
-            next(new Unauthorized('Не правильно указан логин или пароль'));
+            return next(new Unauthorized('Не правильно указан логин или пароль'));
           }
-          const token = jwt.sign(
-            { _id: user._id },
-            'some-secret-key',
-            { expiresIn: '7d' },
-          );
+          const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'super-secret-key', {
+            expiresIn: '7d',
+          });
           return res.send({ token });
         });
     })
@@ -109,7 +115,11 @@ module.exports.editProfile = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') {
+        next(BadRequest('Переданы некорректные данные при обновлении профиля.'));
+      } else next(error);
+    });
 };
 
 // редактирование аватара
@@ -124,5 +134,9 @@ module.exports.editAvatar = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') {
+        next(BadRequest('Переданы некорректные данные при обновлении профиля.'));
+      } else next(error);
+    });
 };
