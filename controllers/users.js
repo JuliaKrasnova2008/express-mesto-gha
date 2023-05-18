@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -72,8 +73,7 @@ module.exports.addUser = (req, res, next) => {
     .catch((error) => {
       if (error.code === 11000) {
         next(new Conflict('Такой пользователь уже существует'));
-      }
-      if (error.name === 'ValidationError') {
+      } else if (error.name === 'ValidationError') {
         next(new BadRequest('Некорректные данные'));
       } else {
         next(error);

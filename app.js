@@ -1,19 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { errors, celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 // const helmet = require('helmet');
 const router = require('./routes');
-const { login, addUser } = require('./controllers/users');
-const { REGEXP } = require('./middlewares/validation');
+// const { login, addUser } = require('./controllers/users');
+// const { REGEXP } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
 const defaultErr = require('./errors/defaultErr');
 const NotFound = require('./errors/notFound');
 const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const authRouter = require('./routes/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,32 +28,7 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.post(
-  '/signin',
-  celebrate({
-    body: Joi.object()
-      .keys({
-        email: Joi.string().required().email(),
-        password: Joi.string().required(),
-      })
-  }),
-  login
-);
-app.post(
-  '/signup',
-  celebrate({
-    body: Joi.object()
-      .keys({
-        name: Joi.string().min(2).max(30),
-        about: Joi.string().min(2).max(30),
-        avatar: Joi.string().regex(REGEXP),
-        email: Joi.string().required().email(),
-        password: Joi.string().required(),
-      })
-  }),
-  addUser
-);
-
+app.use(authRouter);
 app.use(auth);
 app.use(router);
 app.use((req, res, next) => {
@@ -61,8 +38,6 @@ app.use(errorLogger);
 app.use(errors());
 
 app.use(defaultErr);
-
-mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.listen(PORT, () => {
   console.log('server started on port 3000');
