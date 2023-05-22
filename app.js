@@ -3,22 +3,22 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
+const { errors, celebrate, Joi } = require('celebrate');
 const router = require('./routes');
 const cors = require('./middlewares/cors');
 // const cors = require('cors');
-// const { login, addUser } = require('./controllers/users');
-// const { REGEXP } = require('./middlewares/validation');
+const { REGEXP } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
 const defaultErr = require('./errors/defaultErr');
 const NotFound = require('./errors/notFound');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const authRouter = require('./routes/auth');
+// const authRouter = require('./routes/auth');
+const { login, addUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1/mestodb');
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 // app.use(cors({ origin: '*', optionsSuccessStatus: 200, }));
 app.use(helmet());
@@ -33,7 +33,33 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.use(authRouter);
+// app.use(authRouter);
+
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().regex(REGEXP),
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  addUser
+);
+
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  login
+);
+
 app.use(auth);
 app.use(router);
 
