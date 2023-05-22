@@ -118,10 +118,10 @@ module.exports.editProfile = (req, res, next) => {
 
 // редактирование аватара
 module.exports.editAvatar = (req, res, next) => {
-  const { _id } = req.user;
-  const { avatar } = req.body;
+  const id = req.user._id;
+  const avatar = req.body;
 
-  userSchema.findByIdAndUpdate(_id, avatar, { new: true, runValidators: true })
+  userSchema.findByIdAndUpdate(id, avatar, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new NotFound('Пользователь по данному _id не найден');
@@ -130,9 +130,7 @@ module.exports.editAvatar = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError' || error.name === 'CastError') {
-        next(
-          new BadRequest('Переданы некорректные данные при обновлении профиля.')
-        );
+        next(BadRequest('Переданы некорректные данные при обновлении профиля.'));
       } else next(error);
     });
 };
