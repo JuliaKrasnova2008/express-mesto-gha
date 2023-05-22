@@ -1,6 +1,6 @@
 const allowedCors = [
-  'https://juliakrasnova.students.nomoredomains.monster',
-  'http://juliakrasnova.students.nomoredomains.monster',
+  'https://juliaKrasnova.students.nomoredomains.monster',
+  'http://juliaKrasnova.students.nomoredomains.monster',
   'https://api.krasnova.students.nomoredomains.monster',
   'http://api.krasnova.students.nomoredomains.monster',
   'localhost:3000',
