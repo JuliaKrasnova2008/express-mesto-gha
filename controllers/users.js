@@ -94,9 +94,12 @@ module.exports.login = (req, res, next) => {
           if (!match) {
             return next(new Unauthorized('Не правильно указан логин или пароль'));
           }
-          const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'super-secret-key', {
-            expiresIn: '7d',
-          });
+          const token = jwt.sign(
+            { _id: user._id },
+            // NODE_ENV === 'production' ? JWT_SECRET : 'super-secret-key',
+            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+            { expiresIn: '7d' }
+          );
           return res.send({ token });
         });
     })
